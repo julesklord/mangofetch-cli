@@ -1,6 +1,6 @@
 [package]
 name = "mangofetch-cli"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Command-line interface for MangoFetch download manager"
 authors = ["Jules Martins <TU_ID+julesklord@users.noreply.github.com>"]
@@ -9,6 +9,7 @@ repository = "https://github.com/julesklord/mangofetch-cli"
 readme = "../README.md"
 keywords = ["mangofetch", "downloader", "cli", "video"]
 categories = ["command-line-utilities"]
+build = "build.rs"
 
 [[bin]]
 name = "mangofetch"
