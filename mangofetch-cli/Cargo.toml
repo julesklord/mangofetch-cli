@@ -19,7 +19,7 @@ mangofetch-core = { git = "https://github.com/julesklord/mangofetch", branch = "
     "platforms",
 ] }
 clap = { version = "4.4", features = ["derive", "cargo"] }
-indicatif = "0.17"
+indicatif = "0.18"
 tokio = { version = "1", features = ["full", "macros", "rt"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
