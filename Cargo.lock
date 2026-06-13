@@ -1906,7 +1906,7 @@ dependencies = [
 [[package]]
 name = "mangofetch-core"
 version = "0.7.4"
-source = "git+https://github.com/julesklord/mangofetch?branch=main#b7da127fa5792a5937926b23060541bb4ed6f043"
+source = "git+https://github.com/julesklord/mangofetch?branch=main#23cac8d4ffdc6767c6c18074365668655c6051d6"
 dependencies = [
  "aes",
  "anyhow",
@@ -1947,7 +1947,7 @@ dependencies = [
 [[package]]
 name = "mangofetch-plugin-sdk"
 version = "0.7.4"
-source = "git+https://github.com/julesklord/mangofetch?branch=main#b7da127fa5792a5937926b23060541bb4ed6f043"
+source = "git+https://github.com/julesklord/mangofetch?branch=main#23cac8d4ffdc6767c6c18074365668655c6051d6"
 dependencies = [
  "anyhow",
  "async-trait",
