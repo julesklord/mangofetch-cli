@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["mangofetch-cli"]
+
+# This makes 'cargo run' from root execute the CLI by default
+default-members = ["mangofetch-cli"]
+
+[profile.dev]
+debug = 0
+codegen-units = 256
+incremental = true
+
+[profile.dev.package."*"]
+debug = false
+opt-level = 1
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

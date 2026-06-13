@@ -1,0 +1,6 @@
+[sources]
+crates-io = { registry = "https://github.com/rust-lang/crates.io-index" }
+
+[checks]
+licenses = true
+unmaintained = false

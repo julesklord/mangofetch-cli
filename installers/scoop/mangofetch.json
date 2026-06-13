@@ -1,0 +1,24 @@
+{
+    "version": "0.5.3",
+    "description": "Fast, Tropical, Pure Rust media downloader TUI/CLI.",
+    "homepage": "https://github.com/julesklord/mangofetch-cli",
+    "license": "GPL-3.0",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/julesklord/mangofetch-cli/releases/download/v0.5.3/mangofetch-cli-x86_64-pc-windows-msvc.exe#/mangofetch.exe",
+            "hash": "056d955d57ae885ad5b1c65a4286c8be6e99fa0dbfd35b77d08aded8bbb81e2b"
+        }
+    },
+    "bin": "mangofetch.exe",
+    "suggest": {
+        "ffmpeg": "ffmpeg"
+    },
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/julesklord/mangofetch-cli/releases/download/v$version/mangofetch-cli-x86_64-pc-windows-msvc.exe#/mangofetch.exe"
+            }
+        }
+    }
+}

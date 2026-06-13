@@ -1,0 +1,213 @@
+name: MangoFetch Release
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view ${{ github.ref_name }} || gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            suffix: .exe
+            build_gui: true
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+            suffix: .exe
+            build_gui: false # No GUI for Win ARM right now to avoid setup issues
+
+          # macOS
+          - target: x86_64-apple-darwin
+            os: macos-13 # Intel Mac
+            suffix: ""
+            build_gui: true
+          - target: aarch64-apple-darwin
+            os: macos-latest # Apple Silicon Mac
+            suffix: ""
+            build_gui: true
+
+          # Linux (Native)
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            suffix: ""
+            build_gui: true
+
+          # Linux (ARM64 Native via Github Actions ARM runners)
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+            suffix: ""
+            build_gui: true
+
+          # Linux (Raspberry Pi 32-bit via Cross)
+          - target: armv7-unknown-linux-gnueabihf
+            os: ubuntu-latest
+            suffix: ""
+            use_cross: true
+            build_gui: false
+
+          # FreeBSD (via Cross)
+          - target: x86_64-unknown-freebsd
+            os: ubuntu-latest
+            suffix: ""
+            use_cross: true
+            build_gui: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Cross
+        if: matrix.use_cross
+        uses: taiki-e/install-action@cross
+
+      - name: Install Linux Dependencies (Ubuntu x64)
+        if: matrix.os == 'ubuntu-latest' && !matrix.use_cross
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev liblzma-dev pkg-config libglib2.0-dev libgtk-3-dev libjavascriptcoregtk-4.1-dev libsoup-3.0-dev libwebkit2gtk-4.1-dev libasound2-dev libx11-xcb-dev
+
+      - name: Install Linux Dependencies (Ubuntu ARM64)
+        if: matrix.os == 'ubuntu-24.04-arm'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev liblzma-dev pkg-config libglib2.0-dev libgtk-3-dev libjavascriptcoregtk-4.1-dev libsoup-3.0-dev libwebkit2gtk-4.1-dev libasound2-dev libx11-xcb-dev
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+
+      - name: Build CLI (Native)
+        if: "!matrix.use_cross"
+        shell: bash
+        run: cargo build --release -p mangofetch-cli --target ${{ matrix.target }}
+
+      - name: Build CLI (Cross)
+        if: matrix.use_cross
+        shell: bash
+        run: cross build --release -p mangofetch-cli --target ${{ matrix.target }}
+
+      - name: Build GUI (Native)
+        if: matrix.build_gui && !matrix.use_cross
+        shell: bash
+        run: cargo build --release -p mangofetch-gui --target ${{ matrix.target }}
+
+      - name: Prepare Artifacts
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          # CLI
+          CLI_BINARY="mangofetch-cli-${{ matrix.target }}${{ matrix.suffix }}"
+          cp target/${{ matrix.target }}/release/mangofetch${{ matrix.suffix }} ./$CLI_BINARY
+          echo "CLI_ASSET=$CLI_BINARY" >> $GITHUB_ENV
+
+          # GUI (if built)
+          if [ "${{ matrix.build_gui }}" = "true" ]; then
+            GUI_BINARY="mangofetch-gui-${{ matrix.target }}${{ matrix.suffix }}"
+            cp target/${{ matrix.target }}/release/mangofetch-gui${{ matrix.suffix }} ./$GUI_BINARY
+            echo "GUI_ASSET=$GUI_BINARY" >> $GITHUB_ENV
+          fi
+
+      - name: Upload Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release upload ${{ github.ref_name }} ${{ env.CLI_ASSET }} --clobber
+          if [ "${{ matrix.build_gui }}" = "true" ]; then
+            gh release upload ${{ github.ref_name }} ${{ env.GUI_ASSET }} --clobber
+          fi
+
+      - name: Calculate SHA256 (Windows)
+        if: matrix.os == 'windows-latest' && matrix.target == 'x86_64-pc-windows-msvc'
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash -Path ${{ env.CLI_ASSET }} -Algorithm SHA256).Hash.ToLower()
+          echo "SHA256=$hash" >> $env:GITHUB_ENV
+
+      - name: Update Installer Manifests (Windows)
+        if: matrix.os == 'windows-latest' && matrix.target == 'x86_64-pc-windows-msvc'
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $hash = "${{ env.SHA256 }}"
+
+          if (Test-Path "installers/scoop/mangofetch.json") {
+            $scoopPath = "installers/scoop/mangofetch.json"
+            $scoop = Get-Content $scoopPath | ConvertFrom-Json
+            $scoop.version = $version
+            $scoop.architecture.64bit.hash = $hash
+            $scoop.architecture.64bit.url = "https://github.com/julesklord/mangofetch-cli/releases/download/${{ github.ref_name }}/mangofetch-cli-x86_64-pc-windows-msvc.exe#/mangofetch.exe"
+            $scoop | ConvertTo-Json -Depth 10 | Set-Content $scoopPath
+          }
+
+          if (Test-Path "installers/winget/julesklord.mangofetch.yaml") {
+            $wingetPath = "installers/winget/julesklord.mangofetch.yaml"
+            (Get-Content $wingetPath) -replace 'PackageVersion: .*', "PackageVersion: $version" `
+                                      -replace 'InstallerSha256: .*', "InstallerSha256: $hash" `
+                                      -replace 'InstallerUrl: .*', "InstallerUrl: https://github.com/julesklord/mangofetch-cli/releases/download/${{ github.ref_name }}/mangofetch-cli-x86_64-pc-windows-msvc.exe" | Set-Content $wingetPath
+          }
+
+      - name: Commit manifest updates
+        if: matrix.os == 'windows-latest' && matrix.target == 'x86_64-pc-windows-msvc'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add installers/ || echo "No installers directory to add"
+          git commit -m "chore: update installer manifests for ${{ github.ref_name }}" || echo "No changes to commit"
+          git push origin main || echo "Could not push"
+
+  publish-crates:
+    name: Publish to Crates.io
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Publish mangofetch-plugin-sdk
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish -p mangofetch-plugin-sdk || echo "Already published"
+      - name: Publish mangofetch-core
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish -p mangofetch-core || echo "Already published"
+      - name: Publish mangofetch-cli
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish -p mangofetch-cli || echo "Already published"
+      - name: Publish mangofetch-gui
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish -p mangofetch-gui || echo "Already published"

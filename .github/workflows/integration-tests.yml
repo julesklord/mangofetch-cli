@@ -1,0 +1,32 @@
+name: Integration Tests (manual/nightly)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (pinned)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install components
+        run: |
+          rustup component add clippy rustfmt || true
+
+      - name: Run integration tests (allow network)
+        env:
+          MANGOFETCH_OFFLINE: "0"
+        run: |
+          # Run the full test suite including integration tests which may download tools
+          cargo test --workspace

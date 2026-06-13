@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <!-- Grupo principal con el borde negro grueso para dar ese efecto "sticker" -->
+  <g stroke="#000000" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+
+    <!-- Tallo (Ligeramente ladeado a la izquierda para contraste) -->
+    <line x1="50" y1="22" x2="42" y2="10" stroke="#8B4513" stroke-width="6" />
+
+    <!-- Hoja (Lado izquierdo, adosada al cuerpo) -->
+    <path d="M 47 22 C 25 15, 10 35, 20 55 C 30 55, 42 40, 47 22 Z" fill="#00A300" />
+
+    <!-- Cuerpo del Mango (Forma de gota redondeada y muy simétrica) -->
+    <path d="M 50 22 C 20 22, 15 60, 32 80 C 42 92, 58 92, 68 80 C 85 60, 80 22, 50 22 Z" fill="#FF7F00" />
+  </g>
+
+  <!-- Las 3 pequitas/puntos amarillos en la parte inferior derecha -->
+  <circle cx="62" cy="65" r="3.5" fill="#FFC107" />
+  <circle cx="53" cy="73" r="3.5" fill="#FFC107" />
+  <circle cx="68" cy="76" r="3.5" fill="#FFC107" />
+</svg>

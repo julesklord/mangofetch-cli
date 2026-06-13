@@ -1,0 +1,67 @@
+[
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+    "description": "Short video (Big Buck Bunny 10s)"
+  },
+  {
+    "name": "Instagram",
+    "url": "https://www.instagram.com/reels/C5-zS7iv7jU/",
+    "description": "Instagram Reel"
+  },
+  {
+    "name": "TikTok",
+    "url": "https://www.tiktok.com/@khaby.lame/video/7085711652086254853",
+    "description": "Popular TikTok video"
+  },
+  {
+    "name": "Twitter/X",
+    "url": "https://twitter.com/X/status/1683321516037042176",
+    "description": "X logo reveal"
+  },
+  {
+    "name": "Reddit",
+    "url": "https://www.reddit.com/r/videos/comments/6u9r22/short_video_test/",
+    "description": "Short Reddit video"
+  },
+  {
+    "name": "Twitch",
+    "url": "https://www.twitch.tv/esl_csgo/clip/AwkwardAmbitiousWafflePMSTwin",
+    "description": "Twitch Clip"
+  },
+  {
+    "name": "Pinterest",
+    "url": "https://www.pinterest.com/pin/1013303116130438183/",
+    "description": "Pinterest Video Pin"
+  },
+  {
+    "name": "Vimeo",
+    "url": "https://vimeo.com/22439234",
+    "description": "Vimeo Staff Pick"
+  },
+  {
+    "name": "Bilibili",
+    "url": "https://www.bilibili.com/video/BV1xx411c7mD",
+    "description": "Bilibili sample video"
+  },
+  {
+    "name": "Bluesky",
+    "url": "https://bsky.app/profile/bsky.app/post/3ju2e5adi5u2y",
+    "description": "Bluesky post"
+  },
+  {
+    "name": "Telegram",
+    "url": "https://t.me/durov/1",
+    "description": "Telegram post"
+  },
+  {
+    "name": "Magnet Link",
+    "url": "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3a%2f%2fexplodie.org%3a6969",
+    "description": "Sintel (Magnet Link)"
+  },
+  {
+    "name": "Direct Link",
+    "url": "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+    "description": "Direct MP4 link"
+  }
+]
