@@ -1,6 +1,6 @@
 [package]
 name = "mangofetch-cli"
-version = "0.7.4"
+version = "0.1.0"
 edition = "2021"
 description = "Command-line interface for MangoFetch download manager"
 authors = ["Jules Martins <TU_ID+julesklord@users.noreply.github.com>"]

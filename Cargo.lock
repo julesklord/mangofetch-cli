@@ -1883,7 +1883,7 @@ dependencies = [
 
 [[package]]
 name = "mangofetch-cli"
-version = "0.7.3"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1906,7 +1906,8 @@ dependencies = [
 [[package]]
 name = "mangofetch-core"
 version = "0.7.4"
-source = "git+https://github.com/julesklord/mangofetch?branch=main#b7da127fa5792a5937926b23060541bb4ed6f043"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c38ce1a78d71de30aa9cf5cc55f29b389527ebe91f9258a381575666738f112"
 dependencies = [
  "aes",
  "anyhow",
@@ -1947,7 +1948,8 @@ dependencies = [
 [[package]]
 name = "mangofetch-plugin-sdk"
 version = "0.7.4"
-source = "git+https://github.com/julesklord/mangofetch?branch=main#b7da127fa5792a5937926b23060541bb4ed6f043"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e1fe0a09f9222b143dc6140439fa42883de82787dbe393061a9868231521122"
 dependencies = [
  "anyhow",
  "async-trait",
