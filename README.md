@@ -93,6 +93,16 @@ mangofetch-cli <command> [args]
 | `mangofetch-cli logs`            | `log` | Tail debug and download logs.                           |
 | `mangofetch-cli about`           | `a`   | Show version, licensing, and roadmap details.           |
 
+## Local Development
+
+Since this repository resolves `mangofetch-core` directly from crates.io for distribution, you can configure your local workspace to use a path override for development. Add the following to the end of the root `Cargo.toml` in your local development workspace to point to your local copy of `mangofetch`:
+
+```toml
+[patch.crates-io]
+mangofetch-core = { path = "../mangofetch/mangofetch-core" }
+mangofetch-plugin-sdk = { path = "../mangofetch/mangofetch-plugin-sdk" }
+```
+
 ---
 
 ## License
