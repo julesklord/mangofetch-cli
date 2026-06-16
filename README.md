@@ -8,7 +8,7 @@
       <p><strong>Fast, Tropical, Pure Rust CLI.</strong><br/>
       <em>The scriptable, non-interactive command-line interface frontend of the mangoSuite.</em></p>
       <p>
-        <a href="https://crates.io/crates/mangofetch"><img src="https://img.shields.io/crates/v/mangofetch-cli?style=plastic&color=orange" alt="Crates.io"></a>
+        <a href="https://crates.io/crates/mangofetch"><img src="https://img.shields.io/crates/v/mangofetch?style=plastic&color=orange" alt="Crates.io"></a>
         <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue?style=plastic" alt="License GPL-3.0"></a>
         <img src="https://img.shields.io/badge/Built%20With-Rust-red?style=plastic&logo=rust" alt="Built with Rust">
         <img src="https://img.shields.io/badge/Architecture-Asynchronous-brightgreen?style=plastic" alt="Async">
