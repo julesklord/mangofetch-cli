@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>mangofetch‑cli • Fast Rust download manager</title>
+
+        <!-- Tailwind CDN (no build step) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            parchment: "#F7F6F3",
+                            charcoal: "#111111",
+                            grayLight: "#EAEAEA",
+                            pastelRed: { bg: "#FDEBEC", txt: "#9F2F2D" },
+                            pastelBlue: { bg: "#E1F3FE", txt: "#1F6C9F" },
+                            pastelGreen: { bg: "#EDF3EC", txt: "#346538" },
+                            pastelYellow: { bg: "#FBF3DB", txt: "#956400" },
+                        },
+                        fontFamily: {
+                            sans: [
+                                "SF Pro Display",
+                                "Geist Sans",
+                                "Helvetica Neue",
+                                "Switzer",
+                                "sans-serif",
+                            ],
+                            serif: [
+                                "Lyon Text",
+                                "Newsreader",
+                                "Playfair Display",
+                                "Instrument Serif",
+                                "serif",
+                            ],
+                            mono: [
+                                "Geist Mono",
+                                "SF Mono",
+                                "JetBrains Mono",
+                                "monospace",
+                            ],
+                        },
+                        borderRadius: { card: "8px", btn: "4px" },
+                        borderWidth: { card: "1px" },
+                    },
+                },
+            };
+        </script>
+
+        <style>
+            body {
+                @apply bg-parchment text-charcoal font-sans leading-relaxed;
+            }
+            h1,
+            h2,
+            h3 {
+                @apply font-serif;
+            }
+            h1 {
+                @apply text-4xl md:text-5xl tracking-tight leading-tight;
+            }
+            h2 {
+                @apply text-2xl md:text-3xl mt-12 mb-6;
+            }
+            pre,
+            code {
+                @apply font-mono bg-gray-100 p-1 rounded;
+            }
+            .badge {
+                @apply inline-block text-xs uppercase px-2 py-0.5 rounded-full;
+            }
+            .badge-red {
+                background: #fdebec;
+                color: #9f2f2d;
+            }
+            .badge-blue {
+                background: #e1f3fe;
+                color: #1f6c9f;
+            }
+            .badge-green {
+                background: #edf3ec;
+                color: #346538;
+            }
+            .badge-yellow {
+                background: #fbf3db;
+                color: #956400;
+            }
+            .card {
+                @apply border-card border-grayLight rounded-card p-6;
+            }
+            .btn-primary {
+                @apply bg-charcoal text-white py-2 px-4 rounded-btn transition-transform
+                    hover:bg-gray-800 active:scale-95;
+            }
+            .fade-enter {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            .fade-enter-active {
+                opacity: 1;
+                transform: none;
+                transition:
+                    opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+            }
+        </style>
+    </head>
+
+    <body class="max-w-5xl mx-auto">
+        <!-- NAVIGATION -->
+        <nav class="border-b border-grayLight py-4 fade-enter" data-observe>
+            <ul class="flex justify-center gap-8 text-sm">
+                <li><a href="#home" class="hover:underline">Inicio</a></li>
+                <li>
+                    <a href="#install" class="hover:underline">Instalación</a>
+                </li>
+                <li><a href="#usage" class="hover:underline">Uso</a></li>
+                <li>
+                    <a
+                        href="https://github.com/julesklord/mangofetch-cli"
+                        target="_blank"
+                        rel="noopener"
+                        class="hover:underline"
+                        >Repo</a
+                    >
+                </li>
+            </ul>
+        </nav>
+
+        <!-- HERO -->
+        <section id="home" class="py-32 text-center fade-enter" data-observe>
+            <img
+                src="https://picsum.photos/seed/mangofetch/1200/400"
+                alt="MangoFetch background"
+                class="w-full object-cover opacity-10 absolute inset-0 -z-10"
+            />
+            <h1 class="mb-4">mangofetch‑cli</h1>
+            <p class="text-lg mb-8">
+                Fast, tropical, pure‑Rust CLI for scriptable media downloads.
+            </p>
+            <a href="#install" class="btn-primary inline-block"
+                >Instalar con Cargo</a
+            >
+        </section>
+
+        <!-- FEATURES (Bento grid) -->
+        <section class="py-24 fade-enter" data-observe>
+            <h2>Características</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-xl mb-2">Motor asíncrono</h3>
+                    <p>
+                        Potenciado por Tokio; ideal para cron jobs y pipelines
+                        CI.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl mb-2">Más de 1000 plataformas</h3>
+                    <p>
+                        Descargas de YouTube, Torrents, SoundCloud, Instagram y
+                        más mediante <code>mangofetch‑core</code>.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl mb-2">Multi‑plataforma</h3>
+                    <p>
+                        Windows 10/11, macOS, GNU/Linux, BSD; AMD64, ARM64 y
+                        ARMv7.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl mb-2">Binaries auto‑provisionados</h3>
+                    <p>
+                        Detecta y descarga <code>yt‑dlp</code>,
+                        <code>ffmpeg</code>, <code>aria2c</code> cuando faltan.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MANGOSUITE OVERVIEW -->
+        <section class="py-24 fade-enter" data-observe>
+            <h2>Parte del mangoSuite</h2>
+            <p>
+                <strong>mangofetch‑cli</strong> es la capa no interactiva del
+                <a
+                    href="https://github.com/julesklord/mangofetch"
+                    class="underline"
+                    target="_blank"
+                    rel="noopener"
+                    >mangoSuite</a
+                >:
+            </p>
+            <ul class="list-disc ml-6 space-y-2">
+                <li><code>mangofetch</code> – motor core y TUI interactiva.</li>
+                <li>
+                    <code>mangofetch‑cli</code> – esta herramienta de línea de
+                    comandos.
+                </li>
+                <li>
+                    <code>mangofetch‑gui</code> – aplicación de escritorio con
+                    <code>egui</code>.
+                </li>
+            </ul>
+        </section>
+
+        <!-- INSTALL -->
+        <section id="install" class="py-24 fade-enter" data-observe>
+            <h2>Instalación</h2>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="card flex-1">
+                    <h3 class="text-lg mb-2">Via Cargo (recomendado)</h3>
+                    <pre
+                        class="bg-gray-100 p-4 rounded"
+                    ><code>cargo install mangofetch-cli</code></pre>
+                </div>
+                <div class="card flex-1">
+                    <h3 class="text-lg mb-2">Desde el código fuente</h3>
+                    <pre
+                        class="bg-gray-100 p-4 rounded"
+                    ><code>git clone https://github.com/julesklord/mangofetch-cli.git
+cd mangofetch-cli
+cargo build --release</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- USAGE -->
+        <section id="usage" class="py-24 fade-enter" data-observe>
+            <h2>Uso rápido</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-lg mb-2">Descargar un único URL</h3>
+                    <pre
+                        class="bg-gray-100 p-4 rounded"
+                    ><code>mangofetch download https://example.com/video</code></pre>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg mb-2">Descarga por lotes</h3>
+                    <pre
+                        class="bg-gray-100 p-4 rounded"
+                    ><code>mangofetch download-multiple links.txt</code></pre>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg mb-2">
+                        Obtener metadatos sin descargar
+                    </h3>
+                    <pre
+                        class="bg-gray-100 p-4 rounded"
+                    ><code>mangofetch info https://example.com/video</code></pre>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg mb-2">
+                        Verificar dependencias del sistema
+                    </h3>
+                    <pre
+                        class="bg-gray-100 p-4 rounded"
+                    ><code>mangofetch check</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-12 text-center text-sm">
+            <p>
+                © 2024‑2026
+                <a href="https://github.com/julesklord" class="underline"
+                    >Jules Martins</a
+                >. Licencia <a href="LICENSE" class="underline">GPL‑3.0</a>.
+            </p>
+            <p class="mt-2">
+                <span class="badge badge-red">Rust</span>
+                <span class="badge badge-blue">Async</span>
+                <span class="badge badge-green">CLI</span>
+                <span class="badge badge-yellow">Open‑source</span>
+            </p>
+        </footer>
+
+        <!-- Scroll‑entry animation (IntersectionObserver) -->
+        <script>
+            const obs = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((e) => {
+                        if (e.isIntersecting) {
+                            e.target.classList.add("fade-enter-active");
+                            obs.unobserve(e.target);
+                        }
+                    });
+                },
+                { threshold: 0.1 },
+            );
+            document
+                .querySelectorAll("[data-observe]")
+                .forEach((el) => obs.observe(el));
+        </script>
+    </body>
+</html>
