@@ -9,7 +9,7 @@ use crate::output::{
     format_batch_summary, format_clean_summary, format_config_display, format_dependency_check,
     format_info_card, format_queue_list,
 };
-use crate::reporter::{BrutalistTheme, CLIReporter, CliTheme};
+use crate::reporter::{BrutalistTheme, CLIReporter, CliTheme, PlainTheme};
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use mangofetch_core::core::manager::queue::DownloadQueue;
@@ -214,12 +214,16 @@ async fn main() -> Result<()> {
     recovery::init_from_disk();
 
     // Create theme based on CLI flag
-    let theme: Arc<dyn CliTheme> = if cli.ascii_only {
-        Arc::new(BrutalistTheme::new(false))
-    } else {
-        // Auto-detect Unicode support (Unix-like systems generally support it)
-        let supports_unicode = cfg!(unix) || cfg!(target_os = "macos");
-        Arc::new(BrutalistTheme::new(supports_unicode))
+    let theme: Arc<dyn CliTheme> = match cli.theme.as_str() {
+        "zen" => Arc::new(PlainTheme::new(false)),
+        _ => {
+            if cli.ascii_only {
+                Arc::new(BrutalistTheme::new(false))
+            } else {
+                let supports_unicode = cfg!(unix) || cfg!(target_os = "macos");
+                Arc::new(BrutalistTheme::new(supports_unicode))
+            }
+        }
     };
 
     // Create reporter with theme
