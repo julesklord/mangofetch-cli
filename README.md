@@ -75,23 +75,23 @@ cargo build --release
 ## Usage & Command Reference
 
 ```zsh
-mangofetch-cli <command> [args]
+mangofetch <command> [args]
 ```
 
 ### Command List
 
-| Command                          | Alias | Description                                             |
-| :------------------------------- | :---- | :------------------------------------------------------ |
-| `mangofetch-cli download <url>`  | `d`   | Download media from a single link.                     |
-| `mangofetch-cli download-multiple <file>`| `dm`| Batch process links from a text file.                |
-| `mangofetch-cli info <url>`      | `i`   | View metadata cards without downloading.                |
-| `mangofetch-cli list`            | `ls`  | View current queue and recovery items.                  |
-| `mangofetch-cli clean`           | `c`   | Clear download history and system cache.               |
-| `mangofetch-cli config`          | `cfg` | Get, set, or list application configurations.           |
-| `mangofetch-cli check`           | `ch`  | Verify system dependencies (yt-dlp, FFmpeg).            |
-| `mangofetch-cli update`          | `up`  | Update provisioning binaries.                           |
-| `mangofetch-cli logs`            | `log` | Tail debug and download logs.                           |
-| `mangofetch-cli about`           | `a`   | Show version, licensing, and roadmap details.           |
+| Command                              | Description                                             |
+| :----------------------------------- | :------------------------------------------------------ |
+| `mangofetch download <url>`          | Download media from a single link.                      |
+| `mangofetch download-multiple <file>`| Batch process links from a text file.                   |
+| `mangofetch info <url>`              | View metadata cards without downloading.                |
+| `mangofetch list`                    | View current queue and recovery items.                  |
+| `mangofetch clean`                   | Clear download history and system cache.                |
+| `mangofetch config`                  | Get, set, or list application configurations.           |
+| `mangofetch check`                   | Verify system dependencies (yt-dlp, FFmpeg).            |
+| `mangofetch update`                  | Update provisioning binaries.                           |
+| `mangofetch logs`                    | Tail debug and download logs.                           |
+| `mangofetch about`                   | Show version, licensing, and roadmap details.           |
 
 ## Local Development
 
