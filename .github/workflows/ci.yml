@@ -29,10 +29,10 @@ jobs:
       - name: Lint (clippy)
         run: cargo clippy --all-targets --all-features
 
-      - name: Run unit/library tests (offline)
+      - name: Run unit tests (offline)
         env:
           MANGOFETCH_OFFLINE: "1"
-        run: cargo test --workspace --lib --quiet
+        run: cargo test --workspace --bins --tests --quiet
 
   security:
     name: Security checks (cargo-audit)
