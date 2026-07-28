@@ -3,6 +3,7 @@ mod formatting;
 mod output;
 mod reporter; // NEW: Import output formatters module
 
+use crate::formatting::truncate_text;
 use crate::output::{
     format_about_changelog, format_about_info, format_about_roadmap, format_about_terms,
     format_batch_summary, format_clean_summary, format_config_display, format_dependency_check,
@@ -404,11 +405,7 @@ async fn main() -> Result<()> {
                         QueueStatus::Complete { .. } => "Complete".to_string(),
                         QueueStatus::Error { message } => format!("Error: {}", message),
                     };
-                    let title = if i.title.len() > 35 {
-                        format!("{}...", &i.title[..32])
-                    } else {
-                        i.title.clone()
-                    };
+                    let title = truncate_text(&i.title, 35);
                     (i.id, title, i.platform.clone(), status_str, String::new())
                 })
                 .collect();
