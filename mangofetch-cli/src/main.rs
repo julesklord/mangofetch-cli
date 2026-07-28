@@ -177,7 +177,6 @@ enum Commands {
         #[command(subcommand)]
         topic: Option<AboutTopic>,
     },
-
 }
 
 #[derive(Subcommand)]
@@ -677,8 +676,6 @@ async fn main() -> Result<()> {
                 }
             }
         }
-
-
     }
 
     Ok(())
@@ -890,9 +887,12 @@ async fn wait_for_queue(queue: &Arc<tokio::sync::Mutex<DownloadQueue>>) -> bool 
             break;
         }
     }
-    recovery::list()
-        .iter()
-        .any(|i| matches!(i.status, mangofetch_core::models::queue::QueueStatus::Error { .. }))
+    recovery::list().iter().any(|i| {
+        matches!(
+            i.status,
+            mangofetch_core::models::queue::QueueStatus::Error { .. }
+        )
+    })
 }
 
 fn get_json_path(val: &serde_json::Value, path: &str) -> Option<String> {
