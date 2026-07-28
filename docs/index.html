@@ -3,297 +3,769 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>mangofetch‑cli • Fast Rust download manager</title>
-
-        <!-- Tailwind CDN (no build step) -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            parchment: "#F7F6F3",
-                            charcoal: "#111111",
-                            grayLight: "#EAEAEA",
-                            pastelRed: { bg: "#FDEBEC", txt: "#9F2F2D" },
-                            pastelBlue: { bg: "#E1F3FE", txt: "#1F6C9F" },
-                            pastelGreen: { bg: "#EDF3EC", txt: "#346538" },
-                            pastelYellow: { bg: "#FBF3DB", txt: "#956400" },
-                        },
-                        fontFamily: {
-                            sans: [
-                                "SF Pro Display",
-                                "Geist Sans",
-                                "Helvetica Neue",
-                                "Switzer",
-                                "sans-serif",
-                            ],
-                            serif: [
-                                "Lyon Text",
-                                "Newsreader",
-                                "Playfair Display",
-                                "Instrument Serif",
-                                "serif",
-                            ],
-                            mono: [
-                                "Geist Mono",
-                                "SF Mono",
-                                "JetBrains Mono",
-                                "monospace",
-                            ],
-                        },
-                        borderRadius: { card: "8px", btn: "4px" },
-                        borderWidth: { card: "1px" },
-                    },
-                },
-            };
-        </script>
-
+        <title>mangofetch-cli(1) — Fast Rust download manager</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
         <style>
+            :root {
+                --bg: #14120f;
+                --bg-raised: #1c1915;
+                --bg-terminal: #0d0c0a;
+                --mango: #ff8a3d;
+                --mango-deep: #e85d2c;
+                --leaf: #4a8f5c;
+                --cream: #f3ecdd;
+                --muted: #8a8175;
+                --line: #332d26;
+                --line-soft: #241f1a;
+                --radius: 3px;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
             body {
-                @apply bg-parchment text-charcoal font-sans leading-relaxed;
+                margin: 0;
+                background: var(--bg);
+                color: var(--cream);
+                font-family: "IBM Plex Sans", sans-serif;
+                font-size: 16px;
+                line-height: 1.65;
+            }
+            a {
+                color: var(--mango);
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            a:focus-visible,
+            button:focus-visible {
+                outline: 2px solid var(--mango);
+                outline-offset: 2px;
+            }
+            .wrap {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 0 24px;
+            }
+            code,
+            pre,
+            .mono {
+                font-family: "JetBrains Mono", monospace;
             }
             h1,
             h2,
-            h3 {
-                @apply font-serif;
+            h3,
+            .display {
+                font-family: "Space Grotesk", sans-serif;
+                letter-spacing: -0.01em;
             }
-            h1 {
-                @apply text-4xl md:text-5xl tracking-tight leading-tight;
+
+            /* ---------- man-page chrome bars (top + bottom) ---------- */
+            .manbar {
+                border-top: 1px solid var(--line);
+                border-bottom: 1px solid var(--line);
+                font-family: "JetBrains Mono", monospace;
+                font-size: 12px;
+                color: var(--muted);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
             }
-            h2 {
-                @apply text-2xl md:text-3xl mt-12 mb-6;
+            .manbar .wrap {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 24px;
             }
-            pre,
-            code {
-                @apply font-mono bg-gray-100 p-1 rounded;
+            .manbar span:nth-child(2) {
+                color: var(--cream);
+                opacity: 0.6;
             }
-            .badge {
-                @apply inline-block text-xs uppercase px-2 py-0.5 rounded-full;
+
+            /* ---------- top nav ---------- */
+            nav.topnav {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                background: rgba(20, 18, 15, 0.92);
+                backdrop-filter: blur(6px);
+                border-bottom: 1px solid var(--line-soft);
             }
-            .badge-red {
-                background: #fdebec;
-                color: #9f2f2d;
+            .topnav .wrap {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 24px;
             }
-            .badge-blue {
-                background: #e1f3fe;
-                color: #1f6c9f;
+            .brandmark {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-family: "JetBrains Mono", monospace;
+                font-weight: 600;
+                font-size: 14px;
             }
-            .badge-green {
-                background: #edf3ec;
-                color: #346538;
+            .dots {
+                display: flex;
+                gap: 6px;
             }
-            .badge-yellow {
-                background: #fbf3db;
-                color: #956400;
+            .dots i {
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                display: inline-block;
+            }
+            .dots i:nth-child(1) {
+                background: var(--mango);
+            }
+            .dots i:nth-child(2) {
+                background: var(--leaf);
+            }
+            .dots i:nth-child(3) {
+                background: var(--cream);
+                opacity: 0.5;
+            }
+            .topnav ul {
+                list-style: none;
+                display: flex;
+                gap: 28px;
+                margin: 0;
+                padding: 0;
+                font-size: 13px;
+                font-family: "JetBrains Mono", monospace;
+            }
+            .topnav ul a {
+                color: var(--muted);
+            }
+            .topnav ul a:hover {
+                color: var(--cream);
+                text-decoration: none;
+            }
+
+            /* ---------- hero / terminal ---------- */
+            .hero {
+                padding: 72px 0 56px;
+            }
+            .hero .kicker {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 12px;
+                color: var(--mango);
+                text-transform: uppercase;
+                letter-spacing: 0.14em;
+                margin-bottom: 18px;
+            }
+            .hero h1 {
+                font-size: clamp(2.2rem, 5vw, 3.4rem);
+                margin: 0 0 16px;
+                color: var(--cream);
+            }
+            .hero h1 .accent {
+                color: var(--mango);
+            }
+            .hero p.lede {
+                font-size: 1.15rem;
+                color: var(--muted);
+                max-width: 46ch;
+                margin: 0 0 32px;
+            }
+
+            .term {
+                background: var(--bg-terminal);
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                overflow: hidden;
+                box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+            }
+            .term-head {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 14px;
+                border-bottom: 1px solid var(--line-soft);
+                background: linear-gradient(180deg, #17140f, #100e0b);
+            }
+            .term-head .dots i {
+                width: 10px;
+                height: 10px;
+            }
+            .term-head .path {
+                margin-left: 12px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .term-body {
+                padding: 22px 20px 26px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 13.5px;
+                min-height: 210px;
+            }
+            .term-line {
+                white-space: pre-wrap;
+                opacity: 0;
+            }
+            .term-line.prompt::before {
+                content: "$ ";
+                color: var(--leaf);
+            }
+            .term-line.out {
+                color: var(--muted);
+            }
+            .term-line.ok {
+                color: var(--leaf);
+            }
+            .cursor {
+                display: inline-block;
+                width: 7px;
+                height: 14px;
+                background: var(--mango);
+                vertical-align: -2px;
+                animation: blink 1s steps(1) infinite;
+            }
+            @keyframes blink {
+                50% {
+                    opacity: 0;
+                }
+            }
+
+            .barwrap {
+                margin-top: 6px;
+                color: var(--muted);
+            }
+            .bar-track {
+                width: 100%;
+                height: 6px;
+                background: var(--line-soft);
+                border-radius: 4px;
+                overflow: hidden;
+                margin-top: 6px;
+            }
+            .bar-fill {
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(
+                    90deg,
+                    var(--mango-deep),
+                    var(--mango)
+                );
+                border-radius: 4px;
+            }
+
+            /* ---------- section rhythm ---------- */
+            section {
+                padding: 64px 0;
+                border-top: 1px solid var(--line-soft);
+            }
+            .sec-label {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 12px;
+                color: var(--mango);
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+            h2.sec-title {
+                font-size: clamp(1.5rem, 3vw, 2rem);
+                margin: 0 0 28px;
+                color: var(--cream);
+            }
+            .prose {
+                color: var(--muted);
+                max-width: 68ch;
+            }
+            .prose strong {
+                color: var(--cream);
+                font-weight: 600;
+            }
+
+            /* ---------- feature grid ---------- */
+            .grid2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            @media (max-width: 680px) {
+                .grid2 {
+                    grid-template-columns: 1fr;
+                }
             }
             .card {
-                @apply border-card border-grayLight rounded-card p-6;
+                background: var(--bg-raised);
+                border: 1px solid var(--line-soft);
+                border-radius: var(--radius);
+                padding: 22px;
+                transition:
+                    border-color 0.2s ease,
+                    transform 0.2s ease;
+            }
+            .card:hover {
+                border-color: var(--mango-deep);
+                transform: translateY(-2px);
+            }
+            .card .tag {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 11px;
+                color: var(--mango);
+                background: rgba(255, 138, 61, 0.1);
+                border: 1px solid rgba(255, 138, 61, 0.3);
+                padding: 2px 7px;
+                border-radius: 3px;
+                display: inline-block;
+                margin-bottom: 12px;
+            }
+            .card h3 {
+                margin: 0 0 8px;
+                font-size: 1.05rem;
+                color: var(--cream);
+            }
+            .card p {
+                margin: 0;
+                color: var(--muted);
+                font-size: 0.92rem;
+            }
+
+            /* ---------- see also (mangoSuite) ---------- */
+            .suite-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                border: 1px solid var(--line-soft);
+                border-radius: var(--radius);
+                overflow: hidden;
+            }
+            .suite-list li {
+                display: flex;
+                align-items: baseline;
+                gap: 16px;
+                padding: 16px 20px;
+                border-bottom: 1px solid var(--line-soft);
+                background: var(--bg-raised);
+            }
+            .suite-list li:last-child {
+                border-bottom: none;
+            }
+            .suite-list .name {
+                font-family: "JetBrains Mono", monospace;
+                color: var(--cream);
+                font-weight: 600;
+                min-width: 170px;
+            }
+            .suite-list .current .name {
+                color: var(--mango);
+            }
+            .suite-list p {
+                margin: 0;
+                color: var(--muted);
+                font-size: 0.92rem;
+            }
+
+            /* ---------- install / usage code blocks ---------- */
+            pre.code-block {
+                background: var(--bg-terminal);
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                padding: 16px 18px;
+                font-size: 13px;
+                overflow-x: auto;
+                color: var(--cream);
+                margin: 12px 0 0;
+            }
+            pre.code-block .c1 {
+                color: var(--muted);
+            }
+            pre.code-block .kw {
+                color: var(--mango);
+            }
+            h3.block-title {
+                font-size: 0.95rem;
+                color: var(--cream);
+                margin: 0;
+                font-family: "JetBrains Mono", monospace;
+            }
+            .install-grid,
+            .usage-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            @media (max-width: 680px) {
+                .install-grid,
+                .usage-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* ---------- CTA ---------- */
+            .cta-row {
+                display: flex;
+                gap: 14px;
+                flex-wrap: wrap;
+                margin-top: 8px;
+            }
+            .btn {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 13.5px;
+                font-weight: 600;
+                padding: 12px 20px;
+                border-radius: var(--radius);
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition:
+                    transform 0.15s ease,
+                    background 0.15s ease;
+            }
+            .btn:hover {
+                text-decoration: none;
             }
             .btn-primary {
-                @apply bg-charcoal text-white py-2 px-4 rounded-btn transition-transform
-                    hover:bg-gray-800 active:scale-95;
+                background: var(--mango);
+                color: #14120f;
             }
-            .fade-enter {
-                opacity: 0;
-                transform: translateY(12px);
+            .btn-primary:hover {
+                background: var(--cream);
+                transform: translateY(-1px);
             }
-            .fade-enter-active {
-                opacity: 1;
-                transform: none;
-                transition:
-                    opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
-                    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+            .btn-ghost {
+                border: 1px solid var(--line);
+                color: var(--cream);
+            }
+            .btn-ghost:hover {
+                border-color: var(--mango);
+                transform: translateY(-1px);
+            }
+
+            footer.foot {
+                padding: 40px 0 0;
+            }
+            footer .wrap > p {
+                color: var(--muted);
+                font-size: 0.85rem;
+                text-align: center;
+                margin: 0 0 24px;
             }
         </style>
     </head>
+    <body>
+        <div class="manbar">
+            <div class="wrap">
+                <span>MANGOFETCH-CLI(1)</span>
+                <span>v0.x · rust download toolkit</span>
+                <span>General Commands Manual</span>
+            </div>
+        </div>
 
-    <body class="max-w-5xl mx-auto">
-        <!-- NAVIGATION -->
-        <nav class="border-b border-grayLight py-4 fade-enter" data-observe>
-            <ul class="flex justify-center gap-8 text-sm">
-                <li><a href="#home" class="hover:underline">Inicio</a></li>
-                <li>
-                    <a href="#install" class="hover:underline">Instalación</a>
-                </li>
-                <li><a href="#usage" class="hover:underline">Uso</a></li>
-                <li>
+        <nav class="topnav">
+            <div class="wrap">
+                <div class="brandmark">
+                    <span class="dots"><i></i><i></i><i></i></span>
+                    man://mangofetch-cli
+                </div>
+                <ul>
+                    <li><a href="#synopsis">Synopsis</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#install">Install</a></li>
+                    <li>
+                        <a
+                            href="https://github.com/julesklord/mangofetch-cli"
+                            target="_blank"
+                            rel="noopener"
+                            >Repo ↗</a
+                        >
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="wrap">
+            <!-- HERO -->
+            <section class="hero" style="border-top: none; padding-top: 56px">
+                <div class="kicker">1. NAME</div>
+                <h1>mangofetch<span class="accent">-cli</span></h1>
+                <p class="lede">
+                    Rust puro, motor async, cero excusas. La capa scriptable del
+                    mangoSuite para bajar cualquier cosa desde tu terminal o tu
+                    pipeline de CI.
+                </p>
+
+                <div class="term">
+                    <div class="term-head">
+                        <span class="dots"><i></i><i></i><i></i></span>
+                        <span class="path">~/pitahayaDevSoft — zsh</span>
+                    </div>
+                    <div class="term-body" id="termBody">
+                        <div class="term-line prompt" id="l1"></div>
+                        <div class="term-line out" id="l2"></div>
+                        <div class="barwrap" id="barwrap" style="opacity: 0">
+                            <span id="pct">0%</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="barFill"></div>
+                            </div>
+                        </div>
+                        <div class="term-line ok" id="l3"></div>
+                        <span
+                            class="cursor"
+                            id="cursorEnd"
+                            style="display: none"
+                        ></span>
+                    </div>
+                </div>
+
+                <div class="cta-row" style="margin-top: 28px">
+                    <a href="#install" class="btn btn-primary"
+                        >cargo install mangofetch-cli</a
+                    >
                     <a
                         href="https://github.com/julesklord/mangofetch-cli"
                         target="_blank"
                         rel="noopener"
-                        class="hover:underline"
-                        >Repo</a
+                        class="btn btn-ghost"
+                        >Ver el repo</a
                     >
-                </li>
-            </ul>
-        </nav>
+                </div>
+            </section>
 
-        <!-- HERO -->
-        <section id="home" class="py-32 text-center fade-enter" data-observe>
-            <img
-                src="https://picsum.photos/seed/mangofetch/1200/400"
-                alt="MangoFetch background"
-                class="w-full object-cover opacity-10 absolute inset-0 -z-10"
-            />
-            <h1 class="mb-4">mangofetch‑cli</h1>
-            <p class="text-lg mb-8">
-                Fast, tropical, pure‑Rust CLI for scriptable media downloads.
-            </p>
-            <a href="#install" class="btn-primary inline-block"
-                >Instalar con Cargo</a
-            >
-        </section>
+            <!-- SYNOPSIS -->
+            <section id="synopsis">
+                <div class="sec-label">2. Synopsis</div>
+                <h2 class="sec-title">Un comando, cualquier fuente</h2>
+                <pre
+                    class="code-block"
+                ><span class="kw">mangofetch</span> <span class="c1">&lt;download|download-multiple|info|check&gt;</span> [URL|FILE] [FLAGS]</pre>
+            </section>
 
-        <!-- FEATURES (Bento grid) -->
-        <section class="py-24 fade-enter" data-observe>
-            <h2>Características</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="card">
-                    <h3 class="text-xl mb-2">Motor asíncrono</h3>
-                    <p>
-                        Potenciado por Tokio; ideal para cron jobs y pipelines
-                        CI.
-                    </p>
+            <!-- DESCRIPTION -->
+            <section id="description">
+                <div class="sec-label">3. Description</div>
+                <h2 class="sec-title">
+                    Diseñado para vivir en scripts, no en pestañas de navegador
+                </h2>
+                <p class="prose">
+                    <strong>mangofetch-cli</strong> es la interfaz no
+                    interactiva del mangoSuite: sin ventanas, sin clics, solo
+                    exit codes predecibles. Corre sobre Tokio, detecta y
+                    auto-provisiona binarios externos cuando hacen falta, y
+                    habla con más de 1000 plataformas a través de
+                    <code>mangofetch-core</code>.
+                </p>
+            </section>
+
+            <!-- FEATURES -->
+            <section id="features">
+                <div class="sec-label">4. Features</div>
+                <h2 class="sec-title">Lo que trae de fábrica</h2>
+                <div class="grid2">
+                    <div class="card">
+                        <span class="tag">async</span>
+                        <h3>Motor async sobre Tokio</h3>
+                        <p>
+                            Pensado para cron jobs y pipelines de CI donde
+                            bloquear un hilo no es opción.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <span class="tag">1000+</span>
+                        <h3>Cobertura masiva de plataformas</h3>
+                        <p>
+                            YouTube, torrents, SoundCloud, Instagram y el resto
+                            vía <code>mangofetch-core</code>.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <span class="tag">cross-os</span>
+                        <h3>Multiplataforma real</h3>
+                        <p>
+                            Windows 10/11, macOS, GNU/Linux, BSD. AMD64, ARM64 y
+                            ARMv7.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <span class="tag">auto-bin</span>
+                        <h3>Binarios auto-provisionados</h3>
+                        <p>
+                            Detecta y descarga <code>yt-dlp</code>,
+                            <code>ffmpeg</code> y <code>aria2c</code> cuando
+                            faltan.
+                        </p>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3 class="text-xl mb-2">Más de 1000 plataformas</h3>
-                    <p>
-                        Descargas de YouTube, Torrents, SoundCloud, Instagram y
-                        más mediante <code>mangofetch‑core</code>.
-                    </p>
+            </section>
+
+            <!-- SEE ALSO / SUITE -->
+            <section id="see-also">
+                <div class="sec-label">5. See also</div>
+                <h2 class="sec-title">Parte del mangoSuite</h2>
+                <ul class="suite-list">
+                    <li>
+                        <span class="name">mangofetch</span>
+                        <p>Motor core y TUI interactiva.</p>
+                    </li>
+                    <li class="current">
+                        <span class="name">mangofetch-cli</span>
+                        <p>
+                            Esta herramienta — línea de comandos, cero
+                            interacción.
+                        </p>
+                    </li>
+                    <li>
+                        <span class="name">mangofetch-gui</span>
+                        <p>
+                            Aplicación de escritorio construida con
+                            <code>egui</code>.
+                        </p>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- INSTALL -->
+            <section id="install">
+                <div class="sec-label">6. Installation</div>
+                <h2 class="sec-title">Instalación</h2>
+                <div class="install-grid">
+                    <div>
+                        <h3 class="block-title">Vía Cargo (recomendado)</h3>
+                        <pre
+                            class="code-block"
+                        ><span class="kw">cargo</span> install mangofetch-cli</pre>
+                    </div>
+                    <div>
+                        <h3 class="block-title">Desde el código fuente</h3>
+                        <pre
+                            class="code-block"
+                        ><span class="c1">git</span> clone https://github.com/julesklord/mangofetch-cli.git
+<span class="c1">cd</span> mangofetch-cli
+<span class="kw">cargo</span> build --release</pre>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3 class="text-xl mb-2">Multi‑plataforma</h3>
-                    <p>
-                        Windows 10/11, macOS, GNU/Linux, BSD; AMD64, ARM64 y
-                        ARMv7.
-                    </p>
+            </section>
+
+            <!-- USAGE / EXAMPLES -->
+            <section id="examples">
+                <div class="sec-label">7. Examples</div>
+                <h2 class="sec-title">Uso rápido</h2>
+                <div class="usage-grid">
+                    <div>
+                        <h3 class="block-title">Descargar un único URL</h3>
+                        <pre
+                            class="code-block"
+                        ><span class="kw">mangofetch</span> download https://example.com/video</pre>
+                    </div>
+                    <div>
+                        <h3 class="block-title">Descarga por lotes</h3>
+                        <pre
+                            class="code-block"
+                        ><span class="kw">mangofetch</span> download-multiple links.txt</pre>
+                    </div>
+                    <div>
+                        <h3 class="block-title">Metadatos sin descargar</h3>
+                        <pre
+                            class="code-block"
+                        ><span class="kw">mangofetch</span> info https://example.com/video</pre>
+                    </div>
+                    <div>
+                        <h3 class="block-title">Verificar dependencias</h3>
+                        <pre
+                            class="code-block"
+                        ><span class="kw">mangofetch</span> check</pre>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3 class="text-xl mb-2">Binaries auto‑provisionados</h3>
-                    <p>
-                        Detecta y descarga <code>yt‑dlp</code>,
-                        <code>ffmpeg</code>, <code>aria2c</code> cuando faltan.
-                    </p>
+            </section>
+        </main>
+
+        <footer class="foot">
+            <div class="wrap">
+                <p>
+                    © 2024–2026
+                    <a href="https://github.com/julesklord">Jules Martins</a> ·
+                    Licencia <a href="LICENSE">GPL-3.0</a>
+                </p>
+            </div>
+            <div class="manbar">
+                <div class="wrap">
+                    <span>MANGOFETCH-CLI(1)</span>
+                    <span>rust · async · cli · open-source</span>
+                    <span>2026</span>
                 </div>
             </div>
-        </section>
-
-        <!-- MANGOSUITE OVERVIEW -->
-        <section class="py-24 fade-enter" data-observe>
-            <h2>Parte del mangoSuite</h2>
-            <p>
-                <strong>mangofetch‑cli</strong> es la capa no interactiva del
-                <a
-                    href="https://github.com/julesklord/mangofetch"
-                    class="underline"
-                    target="_blank"
-                    rel="noopener"
-                    >mangoSuite</a
-                >:
-            </p>
-            <ul class="list-disc ml-6 space-y-2">
-                <li><code>mangofetch</code> – motor core y TUI interactiva.</li>
-                <li>
-                    <code>mangofetch‑cli</code> – esta herramienta de línea de
-                    comandos.
-                </li>
-                <li>
-                    <code>mangofetch‑gui</code> – aplicación de escritorio con
-                    <code>egui</code>.
-                </li>
-            </ul>
-        </section>
-
-        <!-- INSTALL -->
-        <section id="install" class="py-24 fade-enter" data-observe>
-            <h2>Instalación</h2>
-            <div class="flex flex-col md:flex-row gap-8">
-                <div class="card flex-1">
-                    <h3 class="text-lg mb-2">Via Cargo (recomendado)</h3>
-                    <pre
-                        class="bg-gray-100 p-4 rounded"
-                    ><code>cargo install mangofetch-cli</code></pre>
-                </div>
-                <div class="card flex-1">
-                    <h3 class="text-lg mb-2">Desde el código fuente</h3>
-                    <pre
-                        class="bg-gray-100 p-4 rounded"
-                    ><code>git clone https://github.com/julesklord/mangofetch-cli.git
-cd mangofetch-cli
-cargo build --release</code></pre>
-                </div>
-            </div>
-        </section>
-
-        <!-- USAGE -->
-        <section id="usage" class="py-24 fade-enter" data-observe>
-            <h2>Uso rápido</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="card">
-                    <h3 class="text-lg mb-2">Descargar un único URL</h3>
-                    <pre
-                        class="bg-gray-100 p-4 rounded"
-                    ><code>mangofetch download https://example.com/video</code></pre>
-                </div>
-                <div class="card">
-                    <h3 class="text-lg mb-2">Descarga por lotes</h3>
-                    <pre
-                        class="bg-gray-100 p-4 rounded"
-                    ><code>mangofetch download-multiple links.txt</code></pre>
-                </div>
-                <div class="card">
-                    <h3 class="text-lg mb-2">
-                        Obtener metadatos sin descargar
-                    </h3>
-                    <pre
-                        class="bg-gray-100 p-4 rounded"
-                    ><code>mangofetch info https://example.com/video</code></pre>
-                </div>
-                <div class="card">
-                    <h3 class="text-lg mb-2">
-                        Verificar dependencias del sistema
-                    </h3>
-                    <pre
-                        class="bg-gray-100 p-4 rounded"
-                    ><code>mangofetch check</code></pre>
-                </div>
-            </div>
-        </section>
-
-        <!-- FOOTER -->
-        <footer class="py-12 text-center text-sm">
-            <p>
-                © 2024‑2026
-                <a href="https://github.com/julesklord" class="underline"
-                    >Jules Martins</a
-                >. Licencia <a href="LICENSE" class="underline">GPL‑3.0</a>.
-            </p>
-            <p class="mt-2">
-                <span class="badge badge-red">Rust</span>
-                <span class="badge badge-blue">Async</span>
-                <span class="badge badge-green">CLI</span>
-                <span class="badge badge-yellow">Open‑source</span>
-            </p>
         </footer>
 
-        <!-- Scroll‑entry animation (IntersectionObserver) -->
         <script>
-            const obs = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((e) => {
-                        if (e.isIntersecting) {
-                            e.target.classList.add("fade-enter-active");
-                            obs.unobserve(e.target);
+            (function () {
+                const l1 = document.getElementById("l1");
+                const l2 = document.getElementById("l2");
+                const l3 = document.getElementById("l3");
+                const barwrap = document.getElementById("barwrap");
+                const barFill = document.getElementById("barFill");
+                const pct = document.getElementById("pct");
+                const cursorEnd = document.getElementById("cursorEnd");
+
+                const cmd = "mangofetch download https://example.com/video";
+
+                function typeInto(el, text, speed, done) {
+                    el.style.opacity = 1;
+                    el.textContent = "";
+                    let i = 0;
+                    const t = setInterval(() => {
+                        el.textContent = text.slice(0, i + 1);
+                        i++;
+                        if (i >= text.length) {
+                            clearInterval(t);
+                            if (done) done();
                         }
+                    }, speed);
+                }
+
+                function sequence() {
+                    typeInto(l1, cmd, 32, () => {
+                        setTimeout(() => {
+                            l2.style.opacity = 1;
+                            l2.textContent = "resolving stream · mp4 · 1080p";
+                            setTimeout(() => {
+                                barwrap.style.opacity = 1;
+                                let p = 0;
+                                const bt = setInterval(() => {
+                                    p += Math.random() * 9 + 3;
+                                    if (p >= 100) {
+                                        p = 100;
+                                        clearInterval(bt);
+                                        setTimeout(() => {
+                                            l3.style.opacity = 1;
+                                            l3.textContent =
+                                                "done — saved to ./downloads/video.mp4";
+                                            cursorEnd.style.display =
+                                                "inline-block";
+                                        }, 180);
+                                    }
+                                    barFill.style.width = p + "%";
+                                    pct.textContent = Math.floor(p) + "%";
+                                }, 140);
+                            }, 380);
+                        }, 250);
                     });
-                },
-                { threshold: 0.1 },
-            );
-            document
-                .querySelectorAll("[data-observe]")
-                .forEach((el) => obs.observe(el));
+                }
+                sequence();
+
+                const reduce = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                ).matches;
+                if (reduce) {
+                    l1.style.opacity = 1;
+                    l1.textContent = cmd;
+                    l2.style.opacity = 1;
+                    l2.textContent = "resolving stream · mp4 · 1080p";
+                    barwrap.style.opacity = 1;
+                    barFill.style.width = "100%";
+                    pct.textContent = "100%";
+                    l3.style.opacity = 1;
+                    l3.textContent = "done — saved to ./downloads/video.mp4";
+                }
+            })();
         </script>
     </body>
 </html>
