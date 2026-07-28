@@ -450,16 +450,17 @@ async fn main() -> Result<()> {
                 }
             }
 
-            let items_before = recovery::list().len();
-
             if finished || failed {
                 eprintln!(
-                    "{}ℹ Selective cleaning not yet implemented, clearing all...{}",
-                    theme.color_warning(),
+                    "{}✗ Selective cleaning (--finished / --failed) is not yet implemented.\
+                     \n  Use `mangofetch clean` to clear all items, or `mangofetch clean --logs` to clean logs only.{}",
+                    theme.color_error(),
                     theme.color_reset()
                 );
+                std::process::exit(1);
             }
 
+            let items_before = recovery::list().len();
             recovery::clear_all();
 
             println!("{}", format_clean_summary(items_before, None, &theme));
