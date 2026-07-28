@@ -272,7 +272,9 @@ async fn main() -> Result<()> {
                 &theme,
             )
             .await?;
-            wait_for_queue(&queue).await;
+            if wait_for_queue(&queue).await {
+                std::process::exit(1);
+            }
         }
 
         Commands::DownloadMultiple {
@@ -332,7 +334,9 @@ async fn main() -> Result<()> {
                 "{}",
                 format_batch_summary(total, total - failed, failed, &theme)
             );
-            wait_for_queue(&queue).await;
+            if wait_for_queue(&queue).await || failed > 0 {
+                std::process::exit(1);
+            }
         }
 
         Commands::Info { url } => {
@@ -872,14 +876,23 @@ async fn perform_download(
     Ok(())
 }
 
-async fn wait_for_queue(queue: &Arc<tokio::sync::Mutex<DownloadQueue>>) {
+async fn wait_for_queue(queue: &Arc<tokio::sync::Mutex<DownloadQueue>>) -> bool {
+    let timeout = std::time::Duration::from_secs(30 * 60);
+    let start = tokio::time::Instant::now();
     loop {
+        if start.elapsed() >= timeout {
+            eprintln!("\n⏱ Queue timed out after 30 minutes.");
+            break;
+        }
         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
         let q = queue.lock().await;
         if q.active_count() == 0 && q.next_queued_ids().is_empty() {
             break;
         }
     }
+    recovery::list()
+        .iter()
+        .any(|i| matches!(i.status, mangofetch_core::models::queue::QueueStatus::Error { .. }))
 }
 
 fn get_json_path(val: &serde_json::Value, path: &str) -> Option<String> {
